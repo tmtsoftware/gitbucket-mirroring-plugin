@@ -33,8 +33,11 @@ class GitService(repoInfo: RepositoryInfo, mirror: Mirror) {
 
   private def fetch(): FetchResult = {
     val remoteUrl    = URI.create(mirror.remoteUrl)
-    val fetchCommand = git().fetch().setRemote(remoteUrl.toString).setRefSpecs(mirrorRefSpec)
-    fetchCommand.call()
+    val gitRepo      = git()
+    val fetchCommand = gitRepo.fetch().setRemote(remoteUrl.toString).setRefSpecs(mirrorRefSpec)
+    val result       = fetchCommand.call()
+    gitRepo.close()
+    result
   }
 
   private def git(): Git = new Git(
