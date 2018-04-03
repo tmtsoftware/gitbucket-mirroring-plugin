@@ -1,6 +1,6 @@
 package csw.tools.mirroring.controller
 
-import csw.tools.mirroring.model.Mirror
+import csw.tools.mirroring.model.{Mirror, Repo}
 import csw.tools.mirroring.service.{GitService, MirrorService}
 import gitbucket.core.controller.ControllerBase
 import gitbucket.core.service.{AccountService, RepositoryService}
@@ -45,17 +45,17 @@ class MirrorApiController(mirrorService: MirrorService)
   }
 
   put("/api/v3/repos/:owner/:repository/mirror/status") {
-    ownerOnly { repo =>
-      val maybeResult = for {
-        mirror <- mirrorService.findMirror(repo)
-        mirrorWithStatus = new GitService(repo, mirror).sync()
-        _      <- mirrorService.upsert(repo, mirrorWithStatus)
-        status <- mirrorWithStatus.status
-      } yield {
-        Ok(status)
-      }
-
-      maybeResult.getOrElse(NotFound())
+    val maybeResult = for {
+      repoName <- params.getAs[String]("repository")
+      owner    <- params.getAs[String]("owner")
+      repo = Repo(owner, repoName)
+      mirror <- mirrorService.findMirror(repo)
+      mirrorWithStatus = new GitService(repo, mirror).sync()
+      _      <- mirrorService.upsert(repo, mirrorWithStatus)
+      status <- mirrorWithStatus.status
+    } yield {
+      Ok(status)
     }
+    maybeResult.getOrElse(NotFound())
   }
 }
