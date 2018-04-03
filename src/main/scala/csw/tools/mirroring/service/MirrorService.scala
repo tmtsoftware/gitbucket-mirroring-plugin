@@ -1,7 +1,6 @@
 package csw.tools.mirroring.service
 
 import csw.tools.mirroring.model.{Mirror, Repo}
-import gitbucket.core.service.RepositoryService.RepositoryInfo
 import gitbucket.core.util.Directory
 import org.h2.mvstore.{MVMap, MVStore}
 import org.json4s.jackson.Serialization
@@ -16,16 +15,11 @@ class MirrorService {
 
   def close(): Unit = store.close()
 
-  def findMirror(repo: RepositoryInfo): Option[Mirror] = read(mirrors.get(makeKey(repo)))
-  def findMirror(repo: Repo): Option[Mirror]           = read(mirrors.get(makeKey(repo)))
+  def findMirror(repo: Repo): Option[Mirror]             = read(mirrors.get(makeKey(repo)))
+  def deleteMirror(repo: Repo): Option[Mirror]           = read(mirrors.remove(makeKey(repo)))
+  def upsert(repo: Repo, mirror: Mirror): Option[Mirror] = read(mirrors.put(makeKey(repo), Serialization.write(mirror)))
 
-  def deleteMirror(repo: RepositoryInfo): Option[Mirror] = read(mirrors.remove(makeKey(repo)))
-
-  def upsert(repo: RepositoryInfo, mirror: Mirror): Option[Mirror] = read(mirrors.put(makeKey(repo), Serialization.write(mirror)))
-  def upsert(repo: Repo, mirror: Mirror): Option[Mirror]           = read(mirrors.put(makeKey(repo), Serialization.write(mirror)))
-
-  private def makeKey(repo: RepositoryInfo) = s"${repo.owner}-${repo.name}"
-  private def makeKey(repo: Repo)           = s"${repo.owner}-${repo.name}"
+  private def makeKey(repo: Repo) = s"${repo.owner}-${repo.name}"
 
   private def read(string: String): Option[Mirror] = Option(string).map(Serialization.read[Mirror])
 }
