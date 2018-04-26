@@ -53,14 +53,15 @@ class GitService(repo: Repo, mirror: Mirror) {
     gitRepoRemote.setName("origin")
     gitRepoRemote.setUri(new URIish(remoteUrl.toString))
     gitRepoRemote.call()
-    val initialCommitOpt = Option(gitRepo.getRepository.resolve("removeSC"))
+
+    val initialCommitOpt = Option(gitRepo.getRepository.resolve("bharat/remove-sc"))
     initialCommitOpt.fold {
       gitRepo.fetch().setRemote(remoteUrl.toString).setRefSpecs(mirrorRefSpec).call()
       publish()
     } { initialCommit =>
       gitRepo.fetch().setRemote(remoteUrl.toString).setRefSpecs(fetchMirrorRefSpec).call()
       gitRepo.fetch().setRemote(remoteUrl.toString).setRefSpecs(mirrorRefSpec).call()
-      val newCommitOpt = Option(gitRepo.getRepository.resolve("removeSC"))
+      val newCommitOpt = Option(gitRepo.getRepository.resolve("bharat/remove-sc"))
       newCommitOpt.foreach { newCommit =>
         if (newCommit.compareTo(initialCommit) != 0) {
           publish()
@@ -82,7 +83,7 @@ class GitService(repo: Repo, mirror: Mirror) {
       .cloneRepository()
       .setURI(repositoryPath)
       .setDirectory(new File(s"$repositoryPath/cloned/${repo.name}/"))
-      .setBranch("refs/heads/removeSC")
+      .setBranch("refs/heads/bharat/remove-sc")
       .call();
     // Creating script for publishing artifacts
     createScript(publishScriptPath, publishScriptContent)
