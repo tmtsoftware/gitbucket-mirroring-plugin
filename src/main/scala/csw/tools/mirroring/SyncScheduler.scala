@@ -10,7 +10,7 @@ import scala.util.control.NonFatal
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class SyncScheduler {
-  private val httpPut                         = new HttpPut("http://localhost:8080/api/v3/repos/root/test/mirror/status")
+  private val httpPut                         = new HttpPut("http://localhost:4000/api/v3/repos/root/test/mirror/status")
   private val httpClient: CloseableHttpClient = HttpClients.createDefault()
   private val actorSystem                     = ActorSystem("scheduler")
 

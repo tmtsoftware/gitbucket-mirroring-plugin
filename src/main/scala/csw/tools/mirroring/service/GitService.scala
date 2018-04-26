@@ -53,16 +53,16 @@ class GitService(repo: Repo, mirror: Mirror) {
     gitRepoRemote.setName("origin")
     gitRepoRemote.setUri(new URIish(remoteUrl.toString))
     gitRepoRemote.call()
-    val initialMaster = Option(gitRepo.getRepository.resolve("master"))
-    initialMaster.fold {
+    val initialCommitOpt = Option(gitRepo.getRepository.resolve("removeSC"))
+    initialCommitOpt.fold {
       gitRepo.fetch().setRemote(remoteUrl.toString).setRefSpecs(mirrorRefSpec).call()
       publish()
-    } { master =>
+    } { initialCommit =>
       gitRepo.fetch().setRemote(remoteUrl.toString).setRefSpecs(fetchMirrorRefSpec).call()
       gitRepo.fetch().setRemote(remoteUrl.toString).setRefSpecs(mirrorRefSpec).call()
-      val newMasterOpt = Option(gitRepo.getRepository.resolve("master"))
-      newMasterOpt.foreach { newMaster =>
-        if (newMaster.compareTo(master) != 0) {
+      val newCommitOpt = Option(gitRepo.getRepository.resolve("removeSC"))
+      newCommitOpt.foreach { newCommit =>
+        if (newCommit.compareTo(initialCommit) != 0) {
           publish()
         } else {
           println("*" * 100)
@@ -82,7 +82,7 @@ class GitService(repo: Repo, mirror: Mirror) {
       .cloneRepository()
       .setURI(repositoryPath)
       .setDirectory(new File(s"$repositoryPath/cloned/${repo.name}/"))
-      .setBranch("refs/heads/master")
+      .setBranch("refs/heads/removeSC")
       .call();
     // Creating script for publishing artifacts
     createScript(publishScriptPath, publishScriptContent)
