@@ -24,6 +24,18 @@
          required>
 </div>
 
+<div class="form-group">
+  <label for="deploy-branch">Deploy Branch</label>
+  <input type="text"
+         class="form-control"
+         style="max-width: 50em"
+         id="deploy-branch"
+         value="@mirror.map(_.deployBranch).getOrElse("")"
+         maxlength="2000"
+         size="2000"
+         required>
+</div>
+
 <div class="form-check">
   <input type="checkbox" class="form-check-input" id="enabled" @if(mirror.forall(_.enabled)){ checked }>
   <label class="form-check-label" for="enabled">Enable automatic updates</label>

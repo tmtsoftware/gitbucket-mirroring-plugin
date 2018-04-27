@@ -23,17 +23,17 @@ class GitService(repo: Repo, mirror: Mirror) {
 
   import scala.language.postfixOps
 
-  private val publishScriptPath = s"$repositoryPath/cloned/${repo.name}/publish.sh"
+  private val publishScriptPath = s"/tmp/cloned/${repo.name}/publish.sh"
   private val publishScriptContent =
     s"""#!/bin/bash
        |echo 'running publish script'
-       |cd $repositoryPath/cloned/${repo.name} && sbt publish""".stripMargin
+       |cd /tmp/cloned/${repo.name} && sbt publish""".stripMargin
 
-  private val cleanUpScriptPath = s"$repositoryPath/cloned/${repo.name}/delete.sh"
+  private val cleanUpScriptPath = s"/tmp/cloned/${repo.name}/delete.sh"
   private val cleanUpScriptContent =
     s"""#!/bin/bash 
        |echo 'running clean-up script'
-       |rm -rf $repositoryPath/cloned""".stripMargin
+       |rm -rf /tmp/cloned/${repo.name}""".stripMargin
 
   def sync(): Mirror = {
     val mirrorStatus = try {
@@ -54,14 +54,14 @@ class GitService(repo: Repo, mirror: Mirror) {
     gitRepoRemote.setUri(new URIish(remoteUrl.toString))
     gitRepoRemote.call()
 
-    val initialCommitOpt = Option(gitRepo.getRepository.resolve("bharat/remove-sc"))
+    val initialCommitOpt = Option(gitRepo.getRepository.resolve(mirror.deployBranch))
     initialCommitOpt.fold {
       gitRepo.fetch().setRemote(remoteUrl.toString).setRefSpecs(mirrorRefSpec).call()
       publish()
     } { initialCommit =>
       gitRepo.fetch().setRemote(remoteUrl.toString).setRefSpecs(fetchMirrorRefSpec).call()
       gitRepo.fetch().setRemote(remoteUrl.toString).setRefSpecs(mirrorRefSpec).call()
-      val newCommitOpt = Option(gitRepo.getRepository.resolve("bharat/remove-sc"))
+      val newCommitOpt = Option(gitRepo.getRepository.resolve(mirror.deployBranch))
       newCommitOpt.foreach { newCommit =>
         if (newCommit.compareTo(initialCommit) != 0) {
           publish()
@@ -82,8 +82,8 @@ class GitService(repo: Repo, mirror: Mirror) {
     Git
       .cloneRepository()
       .setURI(repositoryPath)
-      .setDirectory(new File(s"$repositoryPath/cloned/${repo.name}/"))
-      .setBranch("refs/heads/bharat/remove-sc")
+      .setDirectory(new File(s"/tmp/cloned/${repo.name}/"))
+      .setBranch(s"refs/heads/${mirror.deployBranch}")
       .call();
     // Creating script for publishing artifacts
     createScript(publishScriptPath, publishScriptContent)

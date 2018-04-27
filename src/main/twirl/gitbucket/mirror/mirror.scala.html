@@ -53,6 +53,7 @@ $(function(){
 
     var name = $('#name').val()
     var remoteUrl = $('#remote-url').val()
+    var deployBranch = $('#deploy-branch').val()
     var enabled = $('#enabled').is(':checked')
 
     var mirror = {
@@ -60,6 +61,7 @@ $(function(){
       repositoryName: '@repository.name',
       name: name,
       remoteUrl: remoteUrl,
+      deployBranch: deployBranch,
       enabled: enabled
     };
 

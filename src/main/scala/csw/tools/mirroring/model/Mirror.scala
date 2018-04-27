@@ -5,6 +5,7 @@ import java.util.Date
 final case class Mirror(
     name: String,
     remoteUrl: String,
+    deployBranch: String,
     enabled: Boolean,
     status: Option[MirrorStatus]
 ) {
