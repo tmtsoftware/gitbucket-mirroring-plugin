@@ -15,11 +15,12 @@ class MirrorService {
 
   def close(): Unit = store.close()
 
-  def findMirror(repo: Repo): Option[Mirror]             = read(mirrors.get(makeKey(repo)))
-  def deleteMirror(repo: Repo): Option[Mirror]           = read(mirrors.remove(makeKey(repo)))
-  def upsert(repo: Repo, mirror: Mirror): Option[Mirror] = read(mirrors.put(makeKey(repo), Serialization.write(mirror)))
+  def findMirror(repo: Repo): Option[Mirror]             = readMirror(mirrors.get(makeKey(repo)))
+  def deleteMirror(repo: Repo): Option[Mirror]           = readMirror(mirrors.remove(makeKey(repo)))
+  def upsert(repo: Repo, mirror: Mirror): Option[Mirror] = readMirror(mirrors.put(makeKey(repo), Serialization.write(mirror)))
 
-  private def makeKey(repo: Repo) = s"${repo.owner}-${repo.name}"
+  private def makeKey(repo: Repo): String = Serialization.write(repo)
 
-  private def read(string: String): Option[Mirror] = Option(string).map(Serialization.read[Mirror])
+  private def readMirror(string: String): Option[Mirror] = Option(string).map(Serialization.read[Mirror])
+
 }
