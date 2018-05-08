@@ -15,9 +15,17 @@ class MirrorService {
 
   def close(): Unit = store.close()
 
-  def findMirror(repo: Repo): Option[Mirror]             = read(mirrors.get(makeKey(repo)))
-  def deleteMirror(repo: Repo): Option[Mirror]           = read(mirrors.remove(makeKey(repo)))
-  def upsert(repo: Repo, mirror: Mirror): Option[Mirror] = read(mirrors.put(makeKey(repo), Serialization.write(mirror)))
+  def findMirror(repo: Repo): Option[Mirror]   = read(mirrors.get(makeKey(repo)))
+  def deleteMirror(repo: Repo): Option[Mirror] = read(mirrors.remove(makeKey(repo)))
+
+  def upsert(repo: Repo, mirror: Mirror): Option[Mirror] = {
+    findMirror(repo).fold(
+      read(mirrors.put(makeKey(repo), Serialization.write(mirror)))
+    ) { oldMirror =>
+      val newMirror = if (mirror.status.isEmpty) { mirror.copy(status = oldMirror.status) } else mirror
+      read(mirrors.put(makeKey(repo), Serialization.write(newMirror)))
+    }
+  }
 
   private def makeKey(repo: Repo) = s"${repo.owner}-${repo.name}"
 

@@ -28,6 +28,8 @@ $(function(){
     var remoteUrl = $('#remote-url').val()
     var deployBranch = $('#deploy-branch').val()
     var enabled = $('#enabled').is(':checked')
+    var minutes = $('#minutes').val()
+    var hours = $('#hours').val()
 
     var mirror = {
       userName: '@repository.owner',
@@ -35,7 +37,9 @@ $(function(){
       name: name,
       remoteUrl: remoteUrl,
       deployBranch: deployBranch,
-      enabled: enabled
+      enabled: enabled,
+      minutes: minutes,
+      hours: hours
     };
 
     $.ajax({
@@ -45,11 +49,9 @@ $(function(){
       data: JSON.stringify(mirror),
       dataType: 'json',
       success: function() {
-
         location.href = `@helpers.url(repository)/mirror`;
       },
       error: function() {
-
         setAlertMessage('An error occurred while creating new mirror', 'danger');
         location.href = `@helpers.url(repository)/mirror`;
       }

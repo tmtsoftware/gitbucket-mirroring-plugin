@@ -7,6 +7,8 @@ final case class Mirror(
     remoteUrl: String,
     deployBranch: String,
     enabled: Boolean,
+    minutes: String = "15",
+    hours: String = "0",
     status: Option[MirrorStatus]
 ) {
   def withStatus(other: MirrorStatus): Mirror = copy(status = Some(other))
