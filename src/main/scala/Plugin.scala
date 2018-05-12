@@ -1,6 +1,5 @@
-import akka.actor.Cancellable
-import csw.tools.mirroring.SyncScheduler
 import csw.tools.mirroring.controller.{MirrorApiController, MirrorController}
+import csw.tools.mirroring.scheduler.MirrorSyncScheduler
 import csw.tools.mirroring.service.MirrorService
 import gitbucket.core.controller.Context
 import gitbucket.core.plugin.{Link, PluginRegistry}
@@ -14,10 +13,9 @@ class Plugin extends gitbucket.core.plugin.Plugin {
   override val pluginName: String  = "Mirroring Plugin"
   override val description: String = "A Gitbucket plugin for pull based repository mirroring"
 
-  private val mirrorService = new MirrorService
-
-  private val syncScheduler       = new SyncScheduler(mirrorService)
-  private val scheduledSync: Unit = syncScheduler.start()
+  private val mirrorService       = new MirrorService
+  private val mirrorSyncScheduler = new MirrorSyncScheduler(mirrorService)
+  private val scheduler           = mirrorSyncScheduler.getScheduler
 
   override val versions: List[Version] = List(
     new Version("1.0.0")
@@ -27,8 +25,10 @@ class Plugin extends gitbucket.core.plugin.Plugin {
 
   override val controllers = Seq(
     "/*"      -> new MirrorController(mirrorService),
-    "/api/v3" -> new MirrorApiController(mirrorService)
+    "/api/v3" -> new MirrorApiController(mirrorService, mirrorSyncScheduler)
   )
+
+  scheduler.start()
 
   override val repositoryMenus = Seq(
     (repository: RepositoryInfo, context: Context) => Some(Link("mirror", "Mirror", "/mirror", Some("mirror")))
@@ -36,7 +36,7 @@ class Plugin extends gitbucket.core.plugin.Plugin {
 
   override def shutdown(registry: PluginRegistry, context: ServletContext, settings: SystemSettingsService.SystemSettings): Unit = {
     mirrorService.close()
-    syncScheduler.shutdown()
+    scheduler.shutdown()
     super.shutdown(registry, context, settings)
   }
 }

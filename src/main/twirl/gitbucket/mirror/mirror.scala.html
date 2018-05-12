@@ -52,7 +52,7 @@ $(function(){
   $('#mirror-form').submit(function(){
     var remoteUrl = $('#remote-url').val()
     var enabled = $('#enabled').is(':checked')
-    var syncInterval = parseInt($('#syncInterval').val())
+    var syncInterval = parseInt($('#sync-interval').val())
 
     var mirror = {
       userName: '@repository.owner',

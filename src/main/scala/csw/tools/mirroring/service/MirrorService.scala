@@ -22,7 +22,8 @@ class MirrorService {
   def deleteMirror(repo: Repo): Option[Mirror] = readMirror(mirrors.remove(makeKey(repo)))
 
   def upsert(repo: Repo, mirror: Mirror): Option[Mirror] = findMirror(repo) match {
-    case None => readMirror(mirrors.put(makeKey(repo), Serialization.write(mirror)))
+    case None =>
+      readMirror(mirrors.put(makeKey(repo), Serialization.write(mirror)))
     case Some(oldMirror) =>
       val finalMirror = if (mirror.status.isEmpty) mirror.copy(status = oldMirror.status) else mirror
       readMirror(mirrors.put(makeKey(repo), Serialization.write(finalMirror)))
