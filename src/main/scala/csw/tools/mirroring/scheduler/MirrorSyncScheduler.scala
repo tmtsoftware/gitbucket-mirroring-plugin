@@ -21,9 +21,7 @@ class MirrorSyncScheduler(mirrorService: MirrorService) {
   for {
     (repo, mirror) <- mirrorService.getAllMirrors
   } yield {
-    if (mirror.enabled) {
-      upsertJobWithTrigger(repo, mirror)
-    }
+    upsertJobWithTrigger(repo, mirror)
   }
 
   private def buildJob(repo: Repo, mirror: Mirror, repoKey: String): JobDetail = {
