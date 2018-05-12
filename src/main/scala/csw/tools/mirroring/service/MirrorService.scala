@@ -6,6 +6,9 @@ import org.h2.mvstore.{MVMap, MVStore}
 import org.json4s.jackson.Serialization
 import org.json4s.{Formats, NoTypeHints}
 
+import scala.collection.JavaConverters.mapAsScalaConcurrentMapConverter
+import scala.collection.mutable
+
 class MirrorService {
   private implicit val formats: Formats = Serialization.formats(NoTypeHints)
   private val fileName                  = s"${Directory.GitBucketHome}/kv.mv.db"
@@ -15,19 +18,24 @@ class MirrorService {
 
   def close(): Unit = store.close()
 
-  def findMirror(repo: Repo): Option[Mirror]   = read(mirrors.get(makeKey(repo)))
-  def deleteMirror(repo: Repo): Option[Mirror] = read(mirrors.remove(makeKey(repo)))
+  def findMirror(repo: Repo): Option[Mirror]   = readMirror(mirrors.get(makeKey(repo)))
+  def deleteMirror(repo: Repo): Option[Mirror] = readMirror(mirrors.remove(makeKey(repo)))
 
-  def upsert(repo: Repo, mirror: Mirror): Option[Mirror] = {
-    findMirror(repo).fold(
-      read(mirrors.put(makeKey(repo), Serialization.write(mirror)))
-    ) { oldMirror =>
-      val newMirror = if (mirror.status.isEmpty) { mirror.copy(status = oldMirror.status) } else mirror
-      read(mirrors.put(makeKey(repo), Serialization.write(newMirror)))
-    }
+  def upsert(repo: Repo, mirror: Mirror): Option[Mirror] = findMirror(repo) match {
+    case None =>
+      readMirror(mirrors.put(makeKey(repo), Serialization.write(mirror)))
+    case Some(oldMirror) =>
+      val finalMirror = if (mirror.status.isEmpty) mirror.copy(status = oldMirror.status) else mirror
+      readMirror(mirrors.put(makeKey(repo), Serialization.write(finalMirror)))
   }
 
-  private def makeKey(repo: Repo) = s"${repo.owner}-${repo.name}"
+  def makeKey(repo: Repo): String             = Serialization.write(repo)
+  def readRepo(repoKey: String): Option[Repo] = Option(repoKey).map(Serialization.read[Repo])
 
-  private def read(string: String): Option[Mirror] = Option(string).map(Serialization.read[Mirror])
+  private def readMirror(string: String): Option[Mirror] = Option(string).map(Serialization.read[Mirror])
+
+  def getAllMirrors: mutable.Map[Repo, Mirror] = mirrors.asScala.map {
+    case (k, v) => readRepo(k).get -> readMirror(v).get
+  }
+
 }

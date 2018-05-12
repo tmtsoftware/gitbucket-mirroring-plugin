@@ -1,6 +1,7 @@
 package csw.tools.mirroring.controller
 
 import csw.tools.mirroring.model.{Mirror, Repo}
+import csw.tools.mirroring.scheduler.MirrorSyncScheduler
 import csw.tools.mirroring.service.{GitService, MirrorService}
 import gitbucket.core.controller.ControllerBase
 import gitbucket.core.service.{AccountService, RepositoryService}
@@ -9,7 +10,7 @@ import org.scalatra._
 
 import scala.util.Try
 
-class MirrorApiController(mirrorService: MirrorService)
+class MirrorApiController(mirrorService: MirrorService, mirrorSyncScheduler: MirrorSyncScheduler)
     extends ControllerBase
     with AccountService
     with OwnerAuthenticator
@@ -29,6 +30,7 @@ class MirrorApiController(mirrorService: MirrorService)
         val mirror = parsedBody.extract[Mirror]
         mirrorService.upsert(repo, mirror)
         val location = s"${context.path}/api/v3/${repo.owner}/${repo.name}/mirror"
+        mirrorSyncScheduler.upsertJobWithTrigger(repo, mirror)
         Created(mirror, Map("location" -> location))
       }.getOrElse(BadRequest())
     }
@@ -39,6 +41,7 @@ class MirrorApiController(mirrorService: MirrorService)
       Try {
         val mirror = parsedBody.extract[Mirror]
         mirrorService.upsert(repo, mirror)
+        mirrorSyncScheduler.upsertJobWithTrigger(repo, mirror)
         Ok(mirror)
       }.getOrElse(NotFound())
     }

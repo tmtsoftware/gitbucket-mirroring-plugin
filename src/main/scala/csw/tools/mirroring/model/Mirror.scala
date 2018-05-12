@@ -3,12 +3,10 @@ package csw.tools.mirroring.model
 import java.util.Date
 
 final case class Mirror(
-    name: String,
     remoteUrl: String,
     deployBranch: String,
     enabled: Boolean,
-    minutes: String = "15",
-    hours: String = "0",
+    syncInterval: Int = 2,
     status: Option[MirrorStatus]
 ) {
   def withStatus(other: MirrorStatus): Mirror = copy(status = Some(other))
