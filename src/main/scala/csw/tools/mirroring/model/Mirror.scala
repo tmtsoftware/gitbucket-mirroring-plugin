@@ -3,9 +3,9 @@ package csw.tools.mirroring.model
 import java.util.Date
 
 final case class Mirror(
-    name: String,
     remoteUrl: String,
     enabled: Boolean,
+    syncInterval: Int = 2,
     status: Option[MirrorStatus]
 ) {
   def withStatus(other: MirrorStatus): Mirror = copy(status = Some(other))

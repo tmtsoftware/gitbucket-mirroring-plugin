@@ -1,24 +1,23 @@
 @(mirror: Option[csw.tools.mirroring.model.Mirror])(implicit context: gitbucket.core.controller.Context)
 
 <div class="form-group">
-  <label for="name">Mirror Name</label>
-  <input type="text"
-         class="form-control"
-         style="max-width: 25em"
-         id="name"
-         value="@mirror.map(_.name).getOrElse("")"
-         maxlength="100"
-         size="100"
-         required>
-</div>
-
-<div class="form-group">
   <label for="remote-url">Remote URL</label>
   <input type="url"
          class="form-control"
          style="max-width: 50em"
          id="remote-url"
          value="@mirror.map(_.remoteUrl).getOrElse("")"
+         maxlength="2000"
+         size="2000"
+         required>
+</div>
+<div class="form-group">
+  <label for="sync-interval">Auto Sync Interval</label>
+  <input type="number"
+         class="form-control"
+         style="max-width: 50em"
+         id="remote-url"
+         value="@mirror.map(_.syncInterval).getOrElse(10)"
          maxlength="2000"
          size="2000"
          required>
