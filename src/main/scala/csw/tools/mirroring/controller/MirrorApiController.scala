@@ -30,7 +30,7 @@ class MirrorApiController(mirrorService: MirrorService, mirrorSyncScheduler: Mir
         val mirror = parsedBody.extract[Mirror]
         mirrorService.upsert(repo, mirror)
         val location = s"${context.path}/api/v3/${repo.owner}/${repo.name}/mirror"
-        mirrorSyncScheduler.updateJobWithTrigger(repo, mirror)
+        mirrorSyncScheduler.upsertJobWithTrigger(repo, mirror)
         Created(mirror, Map("location" -> location))
       }.getOrElse(BadRequest())
     }
@@ -41,7 +41,7 @@ class MirrorApiController(mirrorService: MirrorService, mirrorSyncScheduler: Mir
       Try {
         val mirror = parsedBody.extract[Mirror]
         mirrorService.upsert(repo, mirror)
-        mirrorSyncScheduler.updateJobWithTrigger(repo, mirror)
+        mirrorSyncScheduler.upsertJobWithTrigger(repo, mirror)
         Ok(mirror)
       }.getOrElse(NotFound())
     }

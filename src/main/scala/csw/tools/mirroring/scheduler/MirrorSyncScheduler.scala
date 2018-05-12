@@ -21,14 +21,9 @@ class MirrorSyncScheduler(mirrorService: MirrorService) {
   for {
     (repo, mirror) <- mirrorService.getAllMirrors
   } yield {
-
-    val repoKey = mirrorService.makeKey(repo)
-
-    val job: JobDetail = buildJob(repo, mirror, repoKey)
-
-    val trigger: SimpleTrigger = buildTrigger(mirror, repoKey)
-
-    scheduler.scheduleJob(job, trigger)
+    if (mirror.enabled) {
+      upsertJobWithTrigger(repo, mirror)
+    }
   }
 
   private def buildJob(repo: Repo, mirror: Mirror, repoKey: String): JobDetail = {
@@ -61,10 +56,12 @@ class MirrorSyncScheduler(mirrorService: MirrorService) {
     trigger
   }
 
-  def updateJobWithTrigger(repo: Repo, mirror: Mirror): Unit = {
-    val repoKey    = mirrorService.makeKey(repo)
-    val newJob     = buildJob(repo, mirror, repoKey)
-    val newTrigger = buildTrigger(mirror, repoKey)
-    scheduler.scheduleJob(newJob, Set(newTrigger).asJava, true)
+  def upsertJobWithTrigger(repo: Repo, mirror: Mirror): Unit = {
+    if (mirror.enabled) {
+      val repoKey    = mirrorService.makeKey(repo)
+      val newJob     = buildJob(repo, mirror, repoKey)
+      val newTrigger = buildTrigger(mirror, repoKey)
+      scheduler.scheduleJob(newJob, Set(newTrigger).asJava, true)
+    }
   }
 }
