@@ -32,10 +32,14 @@ class MirrorApiController(mirrorService: MirrorService, mirrorSyncScheduler: Mir
     ownerOnly { repo =>
       Try {
         val mirror = parsedBody.extract[Mirror]
-        mirrorService.upsert(repo, mirror)
-        val location = s"${context.path}/api/v3/${repo.owner}/${repo.name}/mirror"
-        mirrorSyncScheduler.upsertJobWithTrigger(repo, mirror)
-        Created(mirror, Map("location" -> location))
+        if (mirror.syncIntervalInMinutes <= 0) {
+          NotAcceptable("Please provide positive integer as auto sync interval")
+        } else {
+          mirrorService.upsert(repo, mirror)
+          val location = s"${context.path}/api/v3/${repo.owner}/${repo.name}/mirror"
+          mirrorSyncScheduler.upsertJobWithTrigger(repo, mirror)
+          Created(mirror, Map("location" -> location))
+        }
       }.getOrElse(BadRequest())
     }
   }
@@ -44,9 +48,13 @@ class MirrorApiController(mirrorService: MirrorService, mirrorSyncScheduler: Mir
     ownerOnly { repo =>
       Try {
         val mirror = parsedBody.extract[Mirror]
-        mirrorService.upsert(repo, mirror)
-        mirrorSyncScheduler.upsertJobWithTrigger(repo, mirror)
-        Ok(mirror)
+        if (mirror.syncIntervalInMinutes <= 0) {
+          NotAcceptable("Please provide positive integer as auto sync interval")
+        } else {
+          mirrorService.upsert(repo, mirror)
+          mirrorSyncScheduler.upsertJobWithTrigger(repo, mirror)
+          Ok(mirror)
+        }
       }.getOrElse(NotFound())
     }
   }
