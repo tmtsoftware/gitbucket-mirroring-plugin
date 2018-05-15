@@ -53,7 +53,7 @@ $(function(){
     var remoteUrl = $('#remote-url').val()
     var deployBranch = $('#deploy-branch').val()
     var enabled = $('#enabled').is(':checked')
-    var syncInterval = parseInt($('#sync-interval').val())
+    var syncIntervalInMinutes = parseInt($('#sync-interval').val())
 
     var mirror = {
       userName: '@repository.owner',
@@ -61,7 +61,7 @@ $(function(){
       remoteUrl: remoteUrl,
       deployBranch: deployBranch,
       enabled: enabled,
-      syncInterval:syncInterval
+      syncIntervalInMinutes:syncIntervalInMinutes
     };
 
     $.ajax({
