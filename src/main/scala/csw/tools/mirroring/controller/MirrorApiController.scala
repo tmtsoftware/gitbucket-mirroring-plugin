@@ -19,7 +19,7 @@ class MirrorApiController(mirrorService: MirrorService, mirrorSyncScheduler: Mir
   delete("/api/v3/repos/:owner/:repository/mirror") {
     ownerOnly(repo => {
       val deletedMirror = mirrorService.deleteMirror(repo)
-      deletedMirror.foreach(mirror => mirrorSyncScheduler.deleteMirrorSyncJob(Repo.makeKey(repo)))
+      deletedMirror.foreach(mirror => mirrorSyncScheduler.deleteMirrorSyncJob(Repo.toJsonString(repo)))
       deletedMirror.getOrElse(NotFound())
     })
   }

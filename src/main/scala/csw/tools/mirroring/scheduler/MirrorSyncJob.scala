@@ -14,7 +14,7 @@ class MirrorSyncJob extends Job {
     val key = context.getJobDetail.getKey
 
     logger.info(s"Performing mirror sync for Job $key")
-    Repo.readRepo(key.getName).foreach { repo =>
+    Repo.fromJsonString(key.getName).foreach { repo =>
       HttpClient.sendRequest(repo.owner, repo.name)
     }
   }

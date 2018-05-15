@@ -3,6 +3,8 @@ package csw.tools.mirroring.rest
 import org.apache.http.client.methods.{CloseableHttpResponse, HttpPut}
 import org.apache.http.impl.client.{CloseableHttpClient, HttpClients}
 
+import scala.util.control.NonFatal
+
 object HttpClient {
 
   private val httpClient: CloseableHttpClient = HttpClients.createDefault()
@@ -16,9 +18,9 @@ object HttpClient {
     try {
       response = httpClient.execute(httpPut(owner, repositoryName))
     } catch {
-      case exception: Throwable => exception.printStackTrace()
+      case NonFatal(ex) => ex.printStackTrace()
     } finally {
-      response.close()
+      Option(response).foreach(_.close())
     }
   }
 

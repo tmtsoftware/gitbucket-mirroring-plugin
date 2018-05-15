@@ -45,25 +45,23 @@ class MirrorSyncScheduler(mirrorService: MirrorService) {
   }
 
   def upsertJobWithTrigger(repo: Repo, mirror: Mirror): Unit = {
-    val repoKey = Repo.makeKey(repo)
+    val repoKey = Repo.toJsonString(repo)
 
     if (mirror.enabled) {
-      logger.info(s"Mirror sync is enabled for repoKey = $repoKey")
-      logger.info(s"Updating scheduler with sync job for repoKey = $repoKey")
+      logger.info(s"Updating scheduler for repoKey = $repoKey")
+      logger.info(s"Sync job would fire after every ${mirror.syncInterval} minute(s) for repoKey = $repoKey")
       val newJob     = buildJob(mirror, repoKey)
       val newTrigger = buildTrigger(mirror, repoKey)
-      logger.info(s"Sync job would fire after every ${mirror.syncInterval} minute(s) for repoKey = $repoKey")
       scheduler.scheduleJob(newJob, Set(newTrigger).asJava, true)
     } else {
       logger.info(s"Mirror sync is disabled for repoKey = $repoKey")
-      logger.info(s"Attempting to delete associated scheduled job (if any) for repoKey = $repoKey")
       deleteMirrorSyncJob(repoKey)
     }
   }
 
   def deleteMirrorSyncJob(repoKey: String): Unit = {
     Option(scheduler.getJobDetail(new JobKey(repoKey))).foreach { job =>
-      logger.info(s"Deleting mirror sync job for repoKey = $repoKey")
+      logger.info(s"Removing mirror sync job for repoKey = $repoKey")
       scheduler.deleteJob(job.getKey)
     }
   }
