@@ -18,24 +18,18 @@ class MirrorService {
 
   def close(): Unit = store.close()
 
-  def findMirror(repo: Repo): Option[Mirror]   = readMirror(mirrors.get(makeKey(repo)))
-  def deleteMirror(repo: Repo): Option[Mirror] = readMirror(mirrors.remove(makeKey(repo)))
+  def findMirror(repo: Repo): Option[Mirror]   = readMirror(mirrors.get(Repo.makeKey(repo)))
+  def deleteMirror(repo: Repo): Option[Mirror] = readMirror(mirrors.remove(Repo.makeKey(repo)))
 
-  def upsert(repo: Repo, mirror: Mirror): Option[Mirror] = findMirror(repo) match {
-    case None =>
-      readMirror(mirrors.put(makeKey(repo), Serialization.write(mirror)))
-    case Some(oldMirror) =>
-      val finalMirror = if (mirror.status.isEmpty) mirror.copy(status = oldMirror.status) else mirror
-      readMirror(mirrors.put(makeKey(repo), Serialization.write(finalMirror)))
+  def upsert(repo: Repo, mirror: Mirror): Option[Mirror] = {
+    val updatedMirror = mirror.withStatusFrom(findMirror(repo))
+    readMirror(mirrors.put(Repo.makeKey(repo), Serialization.write(updatedMirror)))
   }
-
-  def makeKey(repo: Repo): String             = Serialization.write(repo)
-  def readRepo(repoKey: String): Option[Repo] = Option(repoKey).map(Serialization.read[Repo])
 
   private def readMirror(string: String): Option[Mirror] = Option(string).map(Serialization.read[Mirror])
 
   def getAllMirrors: mutable.Map[Repo, Mirror] = mirrors.asScala.map {
-    case (k, v) => readRepo(k).get -> readMirror(v).get
+    case (k, v) => Repo.readRepo(k).get -> readMirror(v).get
   }
 
 }
