@@ -5,7 +5,7 @@ import java.util.Date
 final case class Mirror(
     remoteUrl: String,
     enabled: Boolean,
-    syncInterval: Int,
+    syncIntervalInMinutes: Int,
     status: Option[MirrorStatus]
 ) {
   def withStatus(other: MirrorStatus): Mirror       = copy(status = Some(other))
