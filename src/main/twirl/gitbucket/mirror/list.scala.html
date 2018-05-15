@@ -14,9 +14,9 @@
     <div class="table table-bordered table-hover table-mirrors">
       <div>
         <div>
-          <p>@mirrors.size mirrors</p>
+          <p style="padding-left: 10px">@mirrors.size mirrors</p>
           @if(mirrors.isEmpty) {
-            <div style="padding: 20px; background-color: #eee; text-align: center;">
+            <div style="padding: 20px; text-align: center;">
               <div class="pull-right" style="margin-bottom: 10px;">
                 <a href="@helpers.url(repository)/mirror/new" class="btn btn-success">Configure Mirror</a>
               </div>
