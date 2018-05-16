@@ -48,7 +48,12 @@ $(function(){
         location.href = `@helpers.url(repository)/mirror`;
       },
       error: function() {
-        setAlertMessage('An error occurred while creating new mirror', 'danger');
+
+        if(request.status === 406){
+          setAlertMessage(request.statusText + ': ' + request.responseText, 'danger');
+        } else {
+          setAlertMessage('An error happened while updating the mirror.', 'danger');
+        }
         location.href = `@helpers.url(repository)/mirror`;
       }
     });

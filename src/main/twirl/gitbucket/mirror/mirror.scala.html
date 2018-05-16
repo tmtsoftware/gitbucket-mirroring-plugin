@@ -77,8 +77,11 @@ $(function(){
 
       },
       error: function(request, status, error) {
-
-        setAlertMessage('An error happened while updating the mirror.', 'danger');
+          if(request.status === 406){
+            setAlertMessage(request.statusText + ': ' + request.responseText, 'danger');
+          } else {
+            setAlertMessage('An error happened while updating the mirror.', 'danger');
+          }
         location.href = '@helpers.url(repository)/mirror/edit';
 
       }
